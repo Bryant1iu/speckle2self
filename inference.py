@@ -23,7 +23,7 @@ def apply_gamma(image, gamma_value):
     corrected = np.power(image, gamma_value)
     return (corrected * 255).astype(np.uint8)
 
-def visualize(norm_input, output):
+def visualize_result(norm_input, output):
     """
     Display input and gamma-corrected output in two separate windows.
     Gamma is adjustable from 1.0 to 3.0 (step 0.1) using a short slider.
@@ -86,7 +86,7 @@ def run_inference(model, image_array, device, visualize=False):
 
             if visualize:
                 # visualize and output in [0,1]
-                output = visualize(norm_input, output)
+                output = visualize_result(norm_input, output)
 
             output_list.append(output)
 
