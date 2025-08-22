@@ -42,7 +42,7 @@ Our experiments are done with:
 - albumentations 2.0.3
 
 # 2. Inference
-Download pre-trained model and In-vivo or Simulation testset [link](https://drive.google.com/drive/folders/1mIHPcwbXWxDtjKWxtpxfDqkJyP2li8ay?usp=sharing)
+Download pre-trained model and In-vivo or Simulation testset: [link](https://drive.google.com/drive/folders/1mIHPcwbXWxDtjKWxtpxfDqkJyP2li8ay?usp=sharing)
 ```
 # In-vivo testset
 python inference.py \
@@ -59,8 +59,8 @@ python inference.py \
     --visualize
 ```
 
-# 3. Installation
-Training on In-vivo or Simulation dataset
+# 3. Training
+Training on In-vivo or Simulation dataset:
 ```
 python train.py
 ```
