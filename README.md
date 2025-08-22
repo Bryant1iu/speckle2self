@@ -41,4 +41,29 @@ Our experiments are done with:
 - opencv 4.11.0
 - albumentations 2.0.3
 
+# 2. Inference
+Download pre-trained model and In-vivo or Simulation testset [link](https://drive.google.com/drive/folders/1mIHPcwbXWxDtjKWxtpxfDqkJyP2li8ay?usp=sharing)
+```
+# In-vivo testset
+python inference.py \
+    --data_path data/inVivo/test_data.npy \
+    --model_path model_2833.pth \
+    --output_path results.npy \
+    --visualize
+
+# Simulation testset
+python inference.py \
+    --data_path data/simulator/test_data.npy \
+    --model_path model_2999.pth \
+    --output_path results.npy \
+    --visualize
+```
+
+# 3. Installation
+Training on In-vivo or Simulation dataset
+```
+python train.py
+```
+
+
 
