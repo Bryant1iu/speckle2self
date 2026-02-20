@@ -1,5 +1,9 @@
 # Speckle2Self: Self-Supervised Ultrasound Speckle Reduction Without Clean Data
 
+🔗 **Paper Links**  
+- 📄 [ArXiv Version](https://arxiv.org/abs/2507.06828)  
+- 🌐 [Project Page](https://noseefood.github.io/us-speckle2self/)  
+
 PyTorch Implementation of the Paper [**Speckle2Self: Self-Supervised Ultrasound Speckle Reduction Without Clean Data**](https://arxiv.org/abs/2507.06828)
 
 ```
@@ -65,5 +69,8 @@ Training on In-vivo or Simulation dataset:
 python train.py
 ```
 
+## ⚠️ Data Requirement for Best Performance
+
+For optimal performance, please use **ultrasound envelope data** (not B-mode) with a minimum resolution of **512×512**.
 
 
