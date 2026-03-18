@@ -46,26 +46,24 @@ def train_loop(cfg, dataset, model, optimizer, device, output_dir):
 
             img_low = sample['image_low'].to(device)
             img_high = sample['image_high'].to(device)
-            img_mid = sample['image_mid'].to(device)
             label = sample.get('image_clean', None) # simulator dataset has clean labels
             if label is not None:
                 label = label.to(device)
 
             optimizer.zero_grad()
-            pred_hr, pred_lr, pred_mid = model(img_high, img_low, img_mid)
+            pred_hr, pred_lr = model(img_high, img_low)
 
             # Reconstruction Loss
+            rec_target = label if label is not None else img_high
+            rec_target_lr = label if label is not None else img_low
             rec_loss = (
-                cfg['training']['High_res_weight_rec'] * loss_rec(pred_hr, img_high) +
-                cfg['training']['Low_res_weight_rec'] * loss_rec(pred_lr, img_low) +
-                cfg['training']['Mid_res_weight_rec'] * loss_rec(pred_mid, img_mid)
+                cfg['training']['High_res_weight_rec'] * loss_rec(pred_hr, rec_target) +
+                cfg['training']['Low_res_weight_rec'] * loss_rec(pred_lr, rec_target_lr)
             )
 
             # Consistency Loss
             consist_loss = (
-                cfg['training']['Hl_res_weight_consist'] * loss_consist(pred_hr, pred_lr) +
-                cfg['training']['HM_res_weight_consist'] * loss_consist(pred_hr, pred_mid) +
-                cfg['training']['ML_res_weight_consist'] * loss_consist(pred_lr, pred_mid)
+                cfg['training']['Hl_res_weight_consist'] * loss_consist(pred_hr, pred_lr)
             )
 
             total_loss = rec_loss + consist_loss
@@ -81,10 +79,8 @@ def train_loop(cfg, dataset, model, optimizer, device, output_dir):
             if batch_num % cfg['training']['visualize_every'] == 0:
                 writer.add_image('img_lowRes', img_low[0], epoch)
                 writer.add_image('img_highRes', img_high[0], epoch)
-                writer.add_image('img_midRes', img_mid[0], epoch)
                 writer.add_image('pred_hr', pred_hr[0], epoch)
                 writer.add_image('pred_lr', pred_lr[0], epoch)
-                writer.add_image('pred_mid', pred_mid[0], epoch)
                 if label is not None:
                     writer.add_image('label', label[0], epoch)
 

@@ -23,12 +23,9 @@ training:
 
   # loss weights
   High_res_weight_rec: 1.0
-  Mid_res_weight_rec: 1.0
   Low_res_weight_rec: 1.0
 
   Hl_res_weight_consist: 1.0
-  HM_res_weight_consist: 1.0
-  ML_res_weight_consist: 1.0
 
 
 

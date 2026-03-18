@@ -80,7 +80,7 @@ def run_inference(model, image_array, device, visualize=False):
             norm_input = linear_normalization(img_input)
             tensor_input = torch.tensor(norm_input).unsqueeze(0).unsqueeze(0).to(device)
 
-            output_tensor, _, _ = model(tensor_input, tensor_input, tensor_input)
+            output_tensor, _ = model(tensor_input, tensor_input)
             output_tensor = torch.clamp(output_tensor, 0, 1)
             output = output_tensor.squeeze().cpu().numpy()
 
