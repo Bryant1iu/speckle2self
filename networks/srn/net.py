@@ -214,20 +214,17 @@ class SpeckleReductionNet(nn.Module):
 
         self.encoder_highRes = Encoder(input_channels=1)
         self.encoder_lowRes = Encoder(input_channels=1)
-        self.encoder_midRes = Encoder(input_channels=1)
         self.decoder = Decoder(fuse=False)
 
-    def forward(self, hr_img, lr_img, mid_img):
-        
+    def forward(self, hr_img, lr_img):
+
         z_hr = self.encoder_highRes(hr_img)
         z_lr = self.encoder_lowRes(lr_img)
-        z_mid = self.encoder_midRes(mid_img)
 
         I_clean_hr = self.decoder(z_hr)
         I_clean_lr = self.decoder(z_lr)
-        I_clean_mid = self.decoder(z_mid)
 
-        return I_clean_hr, I_clean_lr, I_clean_mid
+        return I_clean_hr, I_clean_lr
     
 
     

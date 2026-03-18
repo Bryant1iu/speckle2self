@@ -29,7 +29,7 @@ python inference.py --data_path <input.npy> --model_path <model.pth> --output_pa
 ## Architecture
 
 ### Network (`networks/srn/net.py`)
-`SpeckleReductionNet` uses **3 parallel encoders** (one per resolution scale: 1x, 0.5x, 0.25x) feeding into a **single shared decoder**. Each encoder has 4 conv blocks + residual blocks, channels: 1→32→64→128→256. The decoder mirrors this with transposed convolutions. A `fuse` flag exists for cross-resolution feature fusion but is currently disabled.
+`SpeckleReductionNet` uses **2 parallel encoders** (one per resolution scale: high-res 1x, low-res 0.25x) feeding into a **single shared decoder**. Each encoder has 4 conv blocks + residual blocks, channels: 1→32→64→128→256. The decoder mirrors this with transposed convolutions. A `fuse` flag exists for cross-resolution feature fusion but is currently disabled.
 
 ### Training (`utils/training_utils.py`)
 - **Reconstruction loss** (L2): compares predictions to input images

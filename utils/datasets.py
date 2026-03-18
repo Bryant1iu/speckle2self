@@ -20,7 +20,6 @@ class BaseDenoisingDataset(Dataset):
             # A.ElasticTransform(alpha=1, sigma=50, interpolation=1, border_mode=4, p=0.4)
         ], additional_targets={
             'image0': 'image',
-            'image1': 'image',
             'mask': 'image'
         })
 
@@ -29,14 +28,12 @@ class BaseDenoisingDataset(Dataset):
         Resize and normalize image at different scales.
         """
         image_low = resize_image(image, 0.25, interpol=self.interp)
-        image_mid = resize_image(image, 0.5, interpol=self.interp)
         image_high = image
 
         image_low = linear_normalization(image_low)
-        image_mid = linear_normalization(image_mid)
         image_high = linear_normalization(image_high)
 
-        return image_low, image_mid, image_high
+        return image_low, image_high
 
     def to_tensor(self, *images):
         """
@@ -60,20 +57,19 @@ class DenoisingDatasetCCA(BaseDenoisingDataset):
 
     def __getitem__(self, idx):
         image_raw = self.images[idx]
-        image_low, image_mid, image_high = self.preprocess_image(image_raw)
+        image_low, image_high = self.preprocess_image(image_raw)
 
         transformed = self.transform(
-            image=image_low, image0=image_high, image1=image_mid
+            image=image_low, image0=image_high
         )
 
-        image_low, image_high, image_mid = self.to_tensor(
-            transformed['image'], transformed['image0'], transformed['image1']
+        image_low, image_high = self.to_tensor(
+            transformed['image'], transformed['image0']
         )
 
         return {
             'image_low': image_low,
             'image_high': image_high,
-            'image_mid': image_mid
         }
 
 
@@ -96,25 +92,22 @@ class DenoisingDatasetSimulator(BaseDenoisingDataset):
         noisy = self.noisy_imgs[idx]
         clean = linear_normalization(self.clean_imgs[idx])
 
-        image_low, image_mid, image_high = self.preprocess_image(noisy)
+        image_low, image_high = self.preprocess_image(noisy)
 
         transformed = self.transform(
             image=image_low,
             image0=image_high,
-            image1=image_mid,
             mask=clean
         )
 
-        image_low, image_high, image_mid, image_clean = self.to_tensor(
+        image_low, image_high, image_clean = self.to_tensor(
             transformed['image'],
             transformed['image0'],
-            transformed['image1'],
             transformed['mask']
         )
 
         return {
             'image_low': image_low,
             'image_high': image_high,
-            'image_mid': image_mid,
             'image_clean': image_clean
         }
