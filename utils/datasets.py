@@ -42,6 +42,70 @@ class BaseDenoisingDataset(Dataset):
         return [torch.from_numpy(np.expand_dims(img, 0)) for img in images]
 
 
+class DenoisingDatasetPaired(BaseDenoisingDataset):
+    """
+    Dataset for paired high-res, low-res and label images stored in separate folders.
+    Expected directory structure:
+        image_dir/
+            img_hr/   - high resolution images
+            img_lr/   - low resolution images
+            label/    - clean label images
+    Files are matched by sorted filename across the three folders.
+    """
+    def __init__(self, image_dir, interp='linear'):
+        super().__init__(interp)
+        hr_dir = os.path.join(image_dir, 'img_hr')
+        lr_dir = os.path.join(image_dir, 'img_lr')
+        label_dir = os.path.join(image_dir, 'label')
+
+        self.hr_paths = sorted([os.path.join(hr_dir, f) for f in os.listdir(hr_dir)
+                                if self._is_image(f)])
+        self.lr_paths = sorted([os.path.join(lr_dir, f) for f in os.listdir(lr_dir)
+                                if self._is_image(f)])
+        self.label_paths = sorted([os.path.join(label_dir, f) for f in os.listdir(label_dir)
+                                   if self._is_image(f)])
+
+        assert len(self.hr_paths) == len(self.lr_paths) == len(self.label_paths), \
+            f"Mismatched file counts: hr={len(self.hr_paths)}, lr={len(self.lr_paths)}, label={len(self.label_paths)}"
+
+    @staticmethod
+    def _is_image(filename):
+        return filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.tif', '.tiff', '.npy'))
+
+    def _load_image(self, path):
+        if path.endswith('.npy'):
+            return np.load(path).astype(np.float32)
+        import cv2
+        img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+        return img.astype(np.float32)
+
+    def __len__(self):
+        return len(self.hr_paths)
+
+    def __getitem__(self, idx):
+        image_high = linear_normalization(self._load_image(self.hr_paths[idx]))
+        image_low = linear_normalization(self._load_image(self.lr_paths[idx]))
+        image_clean = linear_normalization(self._load_image(self.label_paths[idx]))
+
+        transformed = self.transform(
+            image=image_low,
+            image0=image_high,
+            mask=image_clean
+        )
+
+        image_low, image_high, image_clean = self.to_tensor(
+            transformed['image'],
+            transformed['image0'],
+            transformed['mask']
+        )
+
+        return {
+            'image_low': image_low,
+            'image_high': image_high,
+            'image_clean': image_clean
+        }
+
+
 class DenoisingDatasetCCA(BaseDenoisingDataset):
     """
     Dataset for CCA-based denoising using unsupervised low/mid/high resolution inputs.

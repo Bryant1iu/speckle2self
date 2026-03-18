@@ -2,7 +2,7 @@ import os
 import yaml
 import torch
 from networks.srn.net import SpeckleReductionNet
-from utils.datasets import DenoisingDatasetCCA, DenoisingDatasetSimulator
+from utils.datasets import DenoisingDatasetCCA, DenoisingDatasetSimulator, DenoisingDatasetPaired
 from utils.training_utils import init_random_seed, train_loop
 
 import argparse
@@ -24,6 +24,8 @@ def main(cfg_path):
         dataset = DenoisingDatasetCCA(cfg['data']['image_dir'], cfg['data']['interp_method'])
     elif dataset_type == 'simulator':
         dataset = DenoisingDatasetSimulator(cfg['data']['image_dir'], cfg['data']['interp_method'])
+    elif dataset_type == 'paired':
+        dataset = DenoisingDatasetPaired(cfg['data']['image_dir'], cfg['data']['interp_method'])
     else:
         raise ValueError("Unsupported dataset type.")
 

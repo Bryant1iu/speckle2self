@@ -1,0 +1,28 @@
+data:
+  type: paired
+  image_dir: data/paired
+  interp_method: linear
+  res: 512
+
+training:
+  lr: 0.001
+  batch_size: 16
+  optimizer: adam
+  b1: 0.5
+  b2: 0.999
+  epoch: 5000
+  print_every: 100
+  checkpoint_every: 4000
+  visualize_every: 500
+  save_after_epoch: 500
+  output_dir: save_models/paired
+
+  # Loss type
+  loss_rec: L2
+  loss_consist: L1
+
+  # loss weights
+  High_res_weight_rec: 1.0
+  Low_res_weight_rec: 1.0
+
+  Hl_res_weight_consist: 1.0
