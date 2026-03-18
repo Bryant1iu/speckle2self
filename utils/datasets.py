@@ -42,7 +42,7 @@ class BaseDenoisingDataset(Dataset):
         return [torch.from_numpy(np.expand_dims(img, 0)) for img in images]
 
 
-class DenoisingDatasetPaired(BaseDenoisingDataset):
+class DenoisingDatasetPaired(Dataset):
     """
     Dataset for paired high-res, low-res and label images stored in separate folders.
     Expected directory structure:
@@ -50,54 +50,48 @@ class DenoisingDatasetPaired(BaseDenoisingDataset):
             img_hr/   - high resolution images
             img_lr/   - low resolution images
             label/    - clean label images
-    Files are matched by sorted filename across the three folders.
+    Single-channel grayscale images, normalized to [-1, 1] with mean 0.5.
     """
+    EXTENSIONS = ('.png', '.jpg', '.jpeg', '.bmp', '.tif', '.tiff', '.npy')
+
     def __init__(self, image_dir, interp='linear'):
-        super().__init__(interp)
         hr_dir = os.path.join(image_dir, 'img_hr')
         lr_dir = os.path.join(image_dir, 'img_lr')
         label_dir = os.path.join(image_dir, 'label')
 
         self.hr_paths = sorted([os.path.join(hr_dir, f) for f in os.listdir(hr_dir)
-                                if self._is_image(f)])
+                                if f.lower().endswith(self.EXTENSIONS)])
         self.lr_paths = sorted([os.path.join(lr_dir, f) for f in os.listdir(lr_dir)
-                                if self._is_image(f)])
+                                if f.lower().endswith(self.EXTENSIONS)])
         self.label_paths = sorted([os.path.join(label_dir, f) for f in os.listdir(label_dir)
-                                   if self._is_image(f)])
+                                   if f.lower().endswith(self.EXTENSIONS)])
 
         assert len(self.hr_paths) == len(self.lr_paths) == len(self.label_paths), \
             f"Mismatched file counts: hr={len(self.hr_paths)}, lr={len(self.lr_paths)}, label={len(self.label_paths)}"
 
     @staticmethod
-    def _is_image(filename):
-        return filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.tif', '.tiff', '.npy'))
-
-    def _load_image(self, path):
+    def _load_image(path):
         if path.endswith('.npy'):
             return np.load(path).astype(np.float32)
         import cv2
-        img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
-        return img.astype(np.float32)
+        return cv2.imread(path, cv2.IMREAD_GRAYSCALE).astype(np.float32)
+
+    @staticmethod
+    def _normalize(image):
+        """Normalize to [-1, 1] by dividing by 255 and shifting by mean 0.5."""
+        return (image / 255.0 - 0.5) / 0.5
 
     def __len__(self):
         return len(self.hr_paths)
 
     def __getitem__(self, idx):
-        image_high = linear_normalization(self._load_image(self.hr_paths[idx]))
-        image_low = linear_normalization(self._load_image(self.lr_paths[idx]))
-        image_clean = linear_normalization(self._load_image(self.label_paths[idx]))
+        image_high = self._normalize(self._load_image(self.hr_paths[idx]))
+        image_low = self._normalize(self._load_image(self.lr_paths[idx]))
+        image_clean = self._normalize(self._load_image(self.label_paths[idx]))
 
-        transformed = self.transform(
-            image=image_low,
-            image0=image_high,
-            mask=image_clean
-        )
-
-        image_low, image_high, image_clean = self.to_tensor(
-            transformed['image'],
-            transformed['image0'],
-            transformed['mask']
-        )
+        image_high = torch.from_numpy(image_high).unsqueeze(0)
+        image_low = torch.from_numpy(image_low).unsqueeze(0)
+        image_clean = torch.from_numpy(image_clean).unsqueeze(0)
 
         return {
             'image_low': image_low,
