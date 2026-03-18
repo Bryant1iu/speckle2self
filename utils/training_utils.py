@@ -54,9 +54,11 @@ def train_loop(cfg, dataset, model, optimizer, device, output_dir):
             pred_hr, pred_lr = model(img_high, img_low)
 
             # Reconstruction Loss
+            rec_target = label if label is not None else img_high
+            rec_target_lr = label if label is not None else img_low
             rec_loss = (
-                cfg['training']['High_res_weight_rec'] * loss_rec(pred_hr, img_high) +
-                cfg['training']['Low_res_weight_rec'] * loss_rec(pred_lr, img_low)
+                cfg['training']['High_res_weight_rec'] * loss_rec(pred_hr, rec_target) +
+                cfg['training']['Low_res_weight_rec'] * loss_rec(pred_lr, rec_target_lr)
             )
 
             # Consistency Loss
