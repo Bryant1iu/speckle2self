@@ -25,7 +25,7 @@ def main(cfg_path):
     elif dataset_type == 'simulator':
         dataset = DenoisingDatasetSimulator(cfg['data']['image_dir'], cfg['data']['interp_method'])
     elif dataset_type == 'paired':
-        dataset = DenoisingDatasetPaired(cfg['data']['image_dir'], cfg['data']['interp_method'])
+        dataset = DenoisingDatasetPaired(cfg['data']['image_dir'])
     else:
         raise ValueError("Unsupported dataset type.")
 

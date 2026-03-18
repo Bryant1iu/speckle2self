@@ -54,7 +54,7 @@ class DenoisingDatasetPaired(Dataset):
     """
     EXTENSIONS = ('.png', '.jpg', '.jpeg', '.bmp', '.tif', '.tiff', '.npy')
 
-    def __init__(self, image_dir, interp='linear'):
+    def __init__(self, image_dir):
         hr_dir = os.path.join(image_dir, 'img_hr')
         lr_dir = os.path.join(image_dir, 'img_lr')
         label_dir = os.path.join(image_dir, 'label')
